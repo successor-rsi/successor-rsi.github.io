@@ -189,6 +189,9 @@
   .pick label { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--rule); border-radius: 4px; padding: 9px 12px; font-size: 15px; font-weight: 400; cursor: pointer; }
   .pick label:has(input:checked) { border-color: var(--ink); background: var(--fog); }
   .pick input { accent-color: var(--ink); width: 16px; height: 16px; margin: 0; }
+  .opt { font-weight: 400; color: var(--graphite); }
+  .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .form-msg.ok { color: var(--ink); }
 
   /* Team */
   ul.edge { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
@@ -331,8 +334,8 @@
         <div class="filters" role="group" aria-label="Filter collections by stage of the LLM lifecycle" id="filters"></div>
         <div class="registry" id="registry" aria-live="polite"></div>
         <div class="request" id="request">
-          <h3>Request a sample</h3>
-          <p>Pick the collections you want to try. We send a sample task with its verifier and a baseline run, and reply within two working days. Need a collection we don&#8217;t list? We build to spec.</p>
+          <h3>Request a free sample</h3>
+          <p>Samples are free. Pick the collections you want to try, and we&#8217;ll send a sample task with its verifier and a baseline run. We&#8217;re open to any kind of collaboration: design partnerships, custom collections, evaluating your models, joint research, or something we haven&#8217;t thought of yet. Questions are welcome too. We reply within two working days.</p>
           <form class="access" id="access-form" novalidate>
             <fieldset class="field full">
               <legend>Collections</legend>
@@ -343,27 +346,24 @@
               <input id="f-name" name="name" type="text" autocomplete="name" required>
             </div>
             <div class="field">
-              <label for="f-email">Work email</label>
+              <label for="f-email">Email</label>
               <input id="f-email" name="email" type="email" autocomplete="email" required>
             </div>
             <div class="field full">
-              <label for="f-org">Organization</label>
+              <label for="f-org">Organization <span class="opt">(optional)</span></label>
               <input id="f-org" name="org" type="text" autocomplete="organization">
             </div>
             <fieldset class="field full">
-              <legend>For</legend>
-              <div class="choices">
-                <label><input type="radio" name="interest" value="Training" checked> Training</label>
-                <label><input type="radio" name="interest" value="Evaluation"> Evaluation</label>
-                <label><input type="radio" name="interest" value="Training and evaluation"> Both</label>
-              </div>
+              <legend>What it&#8217;s for <span class="opt">(pick any)</span></legend>
+              <div class="pick" id="uses"></div>
             </fieldset>
             <div class="field full">
-              <label for="f-note">What are you training, and where does your loop stall?</label>
+              <label for="f-note">Tell us about your work, or ask us anything</label>
               <textarea id="f-note" name="note"></textarea>
             </div>
+            <div class="hp" aria-hidden="true"><label for="f-hp">Leave this empty</label><input id="f-hp" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
             <div class="field full" style="flex-direction:row;align-items:center;gap:16px;flex-wrap:wrap">
-              <button class="btn" type="submit">Request a sample</button>
+              <button class="btn" type="submit" id="f-submit">Send request</button>
               <span class="note">Or email <span id="contact-text"></span></span>
             </div>
             <p class="form-msg" id="form-msg" role="status"></p>
@@ -440,8 +440,11 @@
   // Set this once the domain's inbox exists, e.g. "founders@your-domain". While it is empty,
   // the form explains how to reach us instead of opening a mail client.
   const CONTACT_EMAIL = "";
-  // Optional: a form backend (e.g. a Formspree endpoint). When set, requests are posted there.
-  const FORM_ENDPOINT = "";
+  // Requests are delivered by FormSubmit (formsubmit.co) to the team inbox. The inbox is
+  // kept out of the page text; once FormSubmit issues its random alias, put the alias here
+  // instead and the address disappears from the page entirely.
+  const FORM_INBOX = atob("NDRzaHV5dW5AZ21haWwuY29t");
+  const FORM_ENDPOINT = "https://formsubmit.co/ajax/" + FORM_INBOX;
 
   // Spectrum glyphs: stage k is drawn as k nested squares, each generation containing the last.
   (function drawSpectrum() {
@@ -636,6 +639,13 @@
     lab.append(cb, document.createTextNode(n));
     pickEl.appendChild(lab);
   });
+  const usesEl = document.getElementById("uses");
+  ["Training", "Evaluation", "Research", "A collaboration", "Just a question", "Something else"].forEach(n => {
+    const lab = el("label");
+    const cb = el("input", { type: "checkbox", name: "uses", value: n });
+    lab.append(cb, document.createTextNode(n));
+    usesEl.appendChild(lab);
+  });
   function requestSample(name) {
     pickEl.querySelectorAll("input").forEach(cb => { if (cb.value === name) cb.checked = true; });
     document.getElementById("request").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -662,18 +672,19 @@
     const email = emailEl.value.trim();
     if (!name || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       msg.className = "form-msg err";
-      msg.textContent = "Add your name and a valid work email to send the request.";
+      msg.textContent = "Add your name and a valid email to send the request.";
       (!name ? nameEl : emailEl).focus();
       return;
     }
-    const interest = form.querySelector("input[name=interest]:checked").value;
+    if (document.getElementById("f-hp").value) return;   // honeypot: bots fill hidden fields
     const picked = [...pickEl.querySelectorAll("input:checked")].map(cb => cb.value);
+    const uses = [...usesEl.querySelectorAll("input:checked")].map(cb => cb.value);
     const fields = {
       name, email,
       organization: document.getElementById("f-org").value.trim(),
       collections: picked.join("; ") || "Not specified",
-      for: interest,
-      note: document.getElementById("f-note").value.trim()
+      for: uses.join("; ") || "Not specified",
+      message: document.getElementById("f-note").value.trim()
     };
     const body = [
       "Name: " + fields.name,
@@ -682,22 +693,33 @@
       "Collections: " + fields.collections,
       "For: " + fields.for,
       "",
-      fields.note
+      fields.message
     ].join("\n");
     if (FORM_ENDPOINT) {
+      const btn = document.getElementById("f-submit");
+      btn.disabled = true;
       msg.className = "form-msg ok";
       msg.textContent = "Sending...";
-      fetch(FORM_ENDPOINT, { method: "POST", headers: { "Accept": "application/json", "Content-Type": "application/json" }, body: JSON.stringify(fields) })
-        .then(r => {
-          if (!r.ok) throw new Error(String(r.status));
+      const payload = Object.assign({}, fields, {
+        _subject: "Successor sample request from " + fields.name + (fields.organization ? " (" + fields.organization + ")" : ""),
+        _template: "table",
+        _captcha: "false"
+      });
+      fetch(FORM_ENDPOINT, { method: "POST", headers: { "Accept": "application/json", "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        .then(r => r.json().then(d => ({ ok: r.ok, d })))
+        .then(({ ok, d }) => {
+          if (!ok || String(d.success) !== "true") throw new Error(d && d.message || "failed");
           form.reset();
           pickEl.querySelectorAll("input").forEach(cb => { cb.checked = false; });
-          msg.textContent = "Thanks. We'll reply within two working days.";
+          usesEl.querySelectorAll("input").forEach(cb => { cb.checked = false; });
+          msg.className = "form-msg ok";
+          msg.textContent = "Thanks, " + fields.name + ". Your request is with us, and we'll reply within two working days.";
         })
         .catch(() => {
           msg.className = "form-msg err";
-          msg.textContent = CONTACT_EMAIL ? "That didn't go through. Please email " + CONTACT_EMAIL + "." : "That didn't go through. Please try again later.";
-        });
+          msg.textContent = CONTACT_EMAIL ? "That didn't go through. Please email " + CONTACT_EMAIL + "." : "That didn't go through. Please try again in a minute.";
+        })
+        .finally(() => { btn.disabled = false; });
       return;
     }
     if (!CONTACT_EMAIL) {
