@@ -702,6 +702,7 @@
       msg.textContent = "Sending...";
       const payload = Object.assign({}, fields, {
         _subject: "Successor sample request from " + fields.name + (fields.organization ? " (" + fields.organization + ")" : ""),
+        _replyto: fields.email,
         _template: "table",
         _captcha: "false"
       });
