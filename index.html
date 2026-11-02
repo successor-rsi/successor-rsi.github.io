@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Successor: step one of recursive self-improvement</title>
+<meta name="description" content="Successor is an RSI research company. We build environments and evals for every stage of LLM development, kept at the edge of what your model can do.">
+<!-- Pre-launch: keep the site out of search engines. Delete this line when you announce. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FFFFFF">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Successor: step one of recursive self-improvement">
+<meta property="og:description" content="An RSI research company building environments and evals for every stage of LLM development.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #FFFFFF;
+    --ink: #000000;
+    --graphite: #5E5E5E;
+    --quiet: #9A9A9A;
+    --rule: #E4E4E4;
+    --fog: #F6F6F5;
+    --signal: #E0301E;
+    --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+    --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 400 17px/1.6 var(--sans);
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--ink); outline-offset: 3px;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; }
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 16px; top: 16px; background: var(--ink); color: var(--paper); padding: 8px 12px; z-index: 10; }
+
+  /* Header */
+  header.site { border-bottom: 1px solid var(--rule); position: sticky; top: 0; background: rgba(255,255,255,.94); backdrop-filter: blur(6px); z-index: 5; }
+  header.site .wrap { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 24px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .brand span { font: 500 25px/1 var(--serif); letter-spacing: -0.01em; }
+  nav.primary { display: flex; align-items: center; gap: 28px; }
+  nav.primary a { text-decoration: none; font-size: 15px; color: var(--graphite); }
+  nav.primary a:hover { color: var(--ink); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    font: 500 15px/1 var(--sans); padding: 13px 20px; border-radius: 4px;
+    background: var(--ink); color: var(--paper); border: 1px solid var(--ink);
+    text-decoration: none; cursor: pointer;
+  }
+  .btn:hover { background: #262626; }
+  .btn.ghost { background: transparent; color: var(--ink); }
+  .btn.ghost:hover { background: var(--fog); }
+  nav.primary .btn { color: var(--paper); padding: 10px 16px; font-size: 14px; }
+
+  /* Hero */
+  .hero { padding: 64px 0 88px; }
+  .hero-top { display: grid; grid-template-columns: 7fr 5fr; gap: 48px; align-items: end; }
+  .hero h1 {
+    font: 400 68px/1.0 var(--serif); letter-spacing: -0.025em; margin: 0;
+  }
+  .hero h1 .nw { white-space: nowrap; }
+  .hero .lead { font-size: 18px; line-height: 1.55; margin: 0; }
+  .hero .lead strong { font-weight: 500; }
+  .hero .actions { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+
+  /* Why: market problem vs. what we do, on the first screen */
+  ol.why { list-style: none; margin: 56px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 40px; row-gap: 0; }
+  /* subgrid keeps title / today / successor rows aligned across the three columns */
+  ol.why li { border-top: 1px solid var(--ink); padding-top: 18px; display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 0; }
+  ol.why h3 { font: 400 24px/1.2 var(--serif); letter-spacing: -0.01em; margin: 0 0 16px; }
+  ol.why .tag { display: block; font: 500 13px/1 var(--sans); color: var(--graphite); margin-bottom: 6px; }
+  ol.why p { margin: 0; font-size: 16px; line-height: 1.5; }
+  ol.why .problem p { color: var(--graphite); }
+  ol.why .ours { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--rule); }
+  ol.why .ours p { color: var(--ink); }
+
+  .spectrum-block { margin-top: 88px; }
+  .spectrum-head { display: grid; grid-template-columns: 3fr 9fr; gap: 48px; margin-bottom: 64px; }
+  .spectrum-head h2 { font: 400 28px/1.15 var(--serif); margin: 0; letter-spacing: -0.01em; }
+  .spectrum-head p { margin: 0; color: var(--graphite); max-width: 40em; }
+  ol.spectrum {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(3, 1fr) 2px repeat(3, 1fr);
+    column-gap: 24px; position: relative;
+  }
+  ol.spectrum li.stop { padding-top: 20px; border-top: 1px solid var(--ink); }
+  ol.spectrum li.stop.ahead { border-top-color: var(--rule); }
+  ol.spectrum svg { display: block; width: 44px; height: 44px; margin-bottom: 20px; }
+  ol.spectrum .lvl { display: block; font: 400 13px/1 var(--sans); color: var(--graphite); margin-bottom: 10px; }
+  ol.spectrum strong { display: block; font: 500 17px/1.3 var(--sans); margin-bottom: 6px; }
+  ol.spectrum li.stop p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--graphite); }
+  ol.spectrum li.stop.ahead strong { color: var(--graphite); }
+  ol.spectrum li.frontier { background: var(--signal); position: relative; transform-origin: top; }
+  ol.spectrum li.frontier span {
+    position: absolute; top: -34px; left: 50%; transform: translateX(-50%);
+    white-space: nowrap; font: 500 14px/1 var(--sans); color: var(--signal);
+  }
+  .band {
+    display: grid; grid-template-columns: repeat(3, 1fr) 2px repeat(3, 1fr);
+    column-gap: 24px; margin-top: 36px;
+  }
+  .band div {
+    grid-column: 3 / 7; border-top: 6px solid var(--ink); padding-top: 12px;
+    font-size: 15px; transform-origin: left;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    ol.spectrum li.frontier { animation: drop 900ms cubic-bezier(.2,.7,.2,1) 300ms both; }
+    ol.spectrum li.frontier span { animation: fade 500ms ease 1000ms both; }
+    .band div { animation: grow 1100ms cubic-bezier(.2,.7,.2,1) 900ms both; }
+  }
+  @keyframes drop { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Sections */
+  section.block { border-top: 1px solid var(--rule); padding: 104px 0; }
+  .grid { display: grid; grid-template-columns: 3fr 9fr; gap: 48px; }
+  .grid > * { min-width: 0; }
+  section.block h2 { font: 400 44px/1.08 var(--serif); letter-spacing: -0.02em; margin: 0; }
+  section.block h2 small { display: block; font: 400 15px/1.5 var(--sans); letter-spacing: 0; color: var(--graphite); margin-top: 14px; max-width: 18em; }
+  .big { font: 400 30px/1.3 var(--serif); letter-spacing: -0.01em; margin: 0 0 40px; max-width: 26em; }
+  .prose { max-width: 40em; }
+  .prose p { margin: 0 0 20px; }
+  .note { font-size: 15px; color: var(--graphite); }
+
+  /* Feature lists */
+  dl.features { display: grid; grid-template-columns: 1fr 1fr; gap: 0 48px; margin: 0; }
+  dl.features div { border-top: 1px solid var(--rule); padding: 18px 0 22px; }
+  dl.features dt { font-weight: 500; margin-bottom: 4px; }
+  dl.features dd { margin: 0; color: var(--graphite); font-size: 16px; }
+
+  figure.chart { margin: 48px 0 0; border: 1px solid var(--rule); padding: 28px 28px 16px; }
+  figure.chart svg { display: block; width: 100%; height: auto; }
+  figure.chart figcaption { font-size: 14px; color: var(--graphite); margin-top: 8px; }
+
+  .env-prose { margin: 0 0 48px; }
+
+  /* Catalog */
+  .filters { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--rule); border-radius: 4px; margin-bottom: 32px; }
+  .filters button {
+    font: 500 14px/1 var(--sans); padding: 11px 14px; background: transparent; border: 0;
+    border-right: 1px solid var(--rule); color: var(--graphite); cursor: pointer;
+  }
+  .filters button:last-child { border-right: 0; }
+  .filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .entry { border-top: 1px solid var(--ink); }
+  .entry:last-child { border-bottom: 1px solid var(--rule); }
+  .entry-head { display: grid; grid-template-columns: 1fr 150px 110px 150px; gap: 24px; padding: 26px 0; align-items: start; }
+  .entry-head h3 { font: 400 25px/1.2 var(--serif); margin: 0 0 4px; }
+  .entry-head .fam { font-size: 14px; color: var(--graphite); margin: 0 0 12px; }
+  .entry-head p.blurb { margin: 0; font-size: 16px; color: #2B2B2B; max-width: 36em; }
+  .meta-label { display: block; font-size: 13px; color: var(--graphite); margin-bottom: 4px; }
+  .meta-val { font-size: 15px; font-weight: 500; white-space: nowrap; }
+  .status::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ink); margin-right: 8px; vertical-align: 2px; }
+  .status.design::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .entry-actions { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+  .entry-actions .toggle { text-align: center; }
+  .toggle { font: 500 14px/1 var(--sans); background: transparent; color: var(--ink); border: 1px solid var(--rule); border-radius: 4px; padding: 10px 12px; cursor: pointer; white-space: nowrap; }
+  .toggle.ask { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .toggle.ask:hover { background: #262626; }
+  .toggle:hover { border-color: var(--ink); }
+  .tasks { display: none; padding-bottom: 28px; overflow-x: auto; }
+  .entry.open .tasks { display: block; }
+  table.task-table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 640px; }
+  .task-table th { text-align: left; font-weight: 500; font-size: 13px; color: var(--graphite); background: var(--fog); padding: 10px 12px; }
+  .task-table td { padding: 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  .task-table td.id, .task-table td.ver { font-family: var(--mono); font-size: 13.5px; }
+  .task-table td.id { white-space: nowrap; }
+  .task-table td.ver { color: #2B2B2B; }
+  .ph { font-size: 13px; color: var(--graphite); border: 1px dashed var(--quiet); border-radius: 3px; padding: 2px 6px; white-space: nowrap; }
+  /* Request a sample (end of the catalog) */
+  .request { margin-top: 64px; border-top: 1px solid var(--ink); padding-top: 28px; scroll-margin-top: 88px; }
+  .request h3 { font: 400 30px/1.2 var(--serif); letter-spacing: -0.01em; margin: 0 0 8px; }
+  .request > p { margin: 0 0 28px; color: var(--graphite); max-width: 40em; }
+  .pick { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pick label { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--rule); border-radius: 4px; padding: 9px 12px; font-size: 15px; font-weight: 400; cursor: pointer; }
+  .pick label:has(input:checked) { border-color: var(--ink); background: var(--fog); }
+  .pick input { accent-color: var(--ink); width: 16px; height: 16px; margin: 0; }
+
+  /* Team */
+  ul.edge { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+  ul.edge li { border-bottom: 1px solid var(--rule); padding: 18px 0; font: 400 22px/1.4 var(--serif); }
+  .team-note { margin: 32px 0 0; max-width: 40em; }
+
+  /* Form */
+  form.access { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 24px; max-width: 760px; margin-top: 8px; }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label, .field legend { font-size: 14px; font-weight: 500; }
+  .field input[type=text], .field input[type=email], .field textarea {
+    font: 400 16px/1.4 var(--sans); padding: 12px 14px; border: 1px solid #CFCFCF; border-radius: 4px; background: var(--paper); color: var(--ink);
+  }
+  .field textarea { min-height: 110px; resize: vertical; }
+  fieldset.field { border: 0; padding: 0; margin: 0; }
+  .choices { display: flex; gap: 20px; flex-wrap: wrap; font-size: 16px; }
+  .choices label { display: inline-flex; align-items: center; gap: 8px; font-weight: 400; }
+  .choices input { accent-color: var(--ink); width: 16px; height: 16px; }
+  .form-msg { grid-column: 1 / -1; margin: 0; font-size: 15px; min-height: 1.5em; }
+  .form-msg.err { color: var(--signal); }
+
+  footer { border-top: 1px solid var(--rule); padding: 32px 0 48px; font-size: 14px; color: var(--graphite); }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  /* Responsive */
+  @media (max-width: 1020px) {
+    nav.primary a:not(.btn) { display: none; }
+    .hero-top { grid-template-columns: 1fr; gap: 32px; }
+    .hero h1 { font-size: 64px; }
+    ol.why { grid-template-columns: 1fr; margin-top: 48px; }
+    ol.why li { margin-bottom: 32px; }
+    .grid, .spectrum-head { grid-template-columns: 1fr; gap: 24px; }
+    .entry-head { grid-template-columns: 1fr 140px 110px; }
+    .entry-actions { grid-column: 1 / -1; flex-direction: row; justify-content: flex-start; flex-wrap: wrap; }
+  }
+  @media (max-width: 760px) {
+    .wrap { padding: 0 20px; }
+    .hero { padding: 64px 0 56px; }
+    .hero h1 { font-size: 44px; }
+    .hero .lead { font-size: 18px; }
+    .spectrum-block { margin-top: 72px; }
+    ol.spectrum { grid-template-columns: 1fr; row-gap: 0; }
+    ol.spectrum li.stop { display: grid; grid-template-columns: 44px 1fr; column-gap: 16px; padding: 16px 0; }
+    ol.spectrum li.stop svg { grid-row: 1 / span 3; margin: 0; }
+    ol.spectrum .lvl { margin-bottom: 6px; }
+    ol.spectrum li.frontier { height: 2px; margin: 34px 0 0; }
+    ol.spectrum li.frontier span { left: 0; transform: none; top: -26px; }
+    .band { display: block; margin-top: 28px; }
+    section.block { padding: 72px 0; }
+    section.block h2 { font-size: 36px; }
+    .big { font-size: 24px; }
+    ol.why h3 { font-size: 22px; }
+    dl.features { grid-template-columns: 1fr; }
+    figure.chart { padding: 16px 12px 12px; }
+    .entry-head { grid-template-columns: 1fr 1fr; }
+    .entry-head > div:first-child { grid-column: 1 / -1; }
+    ul.edge li { font-size: 19px; }
+    form.access { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Successor, home">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="0.75" y="0.75" width="22.5" height="22.5" fill="none" stroke="#000" stroke-width="1.5"/>
+        <rect x="0.75" y="9.75" width="13.5" height="13.5" fill="none" stroke="#000" stroke-width="1.5"/>
+        <rect x="0.75" y="16.5" width="6.75" height="6.75" fill="#000"/>
+      </svg>
+      <span>successor</span>
+    </a>
+    <nav class="primary" aria-label="Primary">
+      <a href="#catalog">Catalog</a>
+      <a href="#environments">Environments</a>
+      <a href="#team">Team</a>
+      <a class="btn" href="#request">Request a sample</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-top">
+        <h1>Step one of recursive <span class="nw">self-improvement.</span></h1>
+        <div>
+          <p class="lead"><strong>Successor is an RSI research company.</strong> We fuel every stage of LLM development, from pretraining to kernels, with environments and evals that keep pace with the models trained on them. A model that gets better at this work gets better at building its successor.</p>
+          <div class="actions">
+            <a class="btn" href="#request">Request a sample</a>
+            <a class="btn ghost" href="#catalog">See the catalog</a>
+          </div>
+        </div>
+      </div>
+
+      <ol class="why" aria-label="What is broken today, and what Successor does instead">
+        <li>
+          <h3>Environments go stale</h3>
+          <div class="problem"><span class="tag">Today</span><p>Tasks are sold as fixed batches. A frontier model saturates them within months, and the lab is back to buying.</p></div>
+          <div class="ours"><span class="tag">Successor</span><p>You subscribe to a capability, not a task list. When your model passes a task, a harder successor takes its place.</p></div>
+        </li>
+        <li>
+          <h3>Model building is left out</h3>
+          <div class="problem"><span class="tag">Today</span><p>Most environments target generic coding and web tasks. Pretraining, post-training and kernel work get almost no training signal.</p></div>
+          <div class="ours"><span class="tag">Successor</span><p>Every collection comes from real LLM development work, across every stage of the pipeline that produces the next model.</p></div>
+        </li>
+        <li>
+          <h3>Hard tasks are often broken tasks</h3>
+          <div class="problem"><span class="tag">Today</span><p>Hand-written tasks ship with ambiguous specs and reward hacks that surface only after a model has trained on them.</p></div>
+          <div class="ours"><span class="tag">Successor</span><p>Tasks are discovered at your model&#8217;s frontier and must survive execution and attack before they ship. Exploits found later are patched everywhere.</p></div>
+        </li>
+      </ol>
+
+      <div class="spectrum-block">
+        <div class="spectrum-head">
+          <h2>RSI is a spectrum</h2>
+          <p>Models are moving from answering questions about machine learning to running parts of the pipeline that trains them. Each step up needs training signal the previous generation couldn&#8217;t produce. That signal is what we build.</p>
+        </div>
+        <ol class="spectrum" aria-label="Stages of recursive self-improvement">
+          <li class="stop" data-k="1"><span class="lvl">Stage 1</span><strong>Answers</strong><p>Explains ML methods. Runs nothing.</p></li>
+          <li class="stop" data-k="2"><span class="lvl">Stage 2</span><strong>Assists</strong><p>Writes code that a researcher runs and judges.</p></li>
+          <li class="stop" data-k="3"><span class="lvl">Stage 3</span><strong>Executes</strong><p>Runs a bounded experiment end to end.</p></li>
+          <li class="frontier"><span>Frontier models today</span></li>
+          <li class="stop ahead" data-k="4"><span class="lvl">Stage 4</span><strong>Owns a stage</strong><p>Improves one stage of its own training pipeline.</p></li>
+          <li class="stop ahead" data-k="5"><span class="lvl">Stage 5</span><strong>Builds the pipeline</strong><p>Improves the pipeline that trains its successor.</p></li>
+          <li class="stop ahead" data-k="6"><span class="lvl">Stage 6</span><strong>Recursive</strong><p>Each generation builds the next.</p></li>
+        </ol>
+        <div class="band"><div>Where Successor environments train and measure: the next step past the frontier, not the last one.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="block" id="catalog" aria-labelledby="catalog-h">
+    <div class="wrap grid">
+      <h2 id="catalog-h">Catalog<small>Collections across the LLM lifecycle and the research frontier. Sample tasks are illustrative.</small></h2>
+      <div>
+        <div class="filters" role="group" aria-label="Filter collections by stage of the LLM lifecycle" id="filters"></div>
+        <div class="registry" id="registry" aria-live="polite"></div>
+        <div class="request" id="request">
+          <h3>Request a sample</h3>
+          <p>Pick the collections you want to try. We send a sample task with its verifier and a baseline run, and reply within two working days. Need a collection we don&#8217;t list? We build to spec.</p>
+          <form class="access" id="access-form" novalidate>
+            <fieldset class="field full">
+              <legend>Collections</legend>
+              <div class="pick" id="pick"></div>
+            </fieldset>
+            <div class="field">
+              <label for="f-name">Name</label>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="f-email">Work email</label>
+              <input id="f-email" name="email" type="email" autocomplete="email" required>
+            </div>
+            <div class="field full">
+              <label for="f-org">Organization</label>
+              <input id="f-org" name="org" type="text" autocomplete="organization">
+            </div>
+            <fieldset class="field full">
+              <legend>For</legend>
+              <div class="choices">
+                <label><input type="radio" name="interest" value="Training" checked> Training</label>
+                <label><input type="radio" name="interest" value="Evaluation"> Evaluation</label>
+                <label><input type="radio" name="interest" value="Training and evaluation"> Both</label>
+              </div>
+            </fieldset>
+            <div class="field full">
+              <label for="f-note">What are you training, and where does your loop stall?</label>
+              <textarea id="f-note" name="note"></textarea>
+            </div>
+            <div class="field full" style="flex-direction:row;align-items:center;gap:16px;flex-wrap:wrap">
+              <button class="btn" type="submit">Request a sample</button>
+              <span class="note">Or email <span id="contact-text"></span></span>
+            </div>
+            <p class="form-msg" id="form-msg" role="status"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="environments" aria-labelledby="env-h">
+    <div class="wrap grid">
+      <h2 id="env-h">Environments<small>Subscriptions that keep pace with your models</small></h2>
+      <div>
+        <p class="big">High-fidelity environments for the work that builds models, kept in the band where your models still learn from them.</p>
+        <div class="prose env-prose">
+          <p>Tasks are discovered, not hand-written. Frontier models propose candidates just beyond their own reach, and a candidate becomes an environment only if its reference solution runs and it holds up when the strongest available model tries to break it.</p>
+          <p>Every task keeps its lineage: where it came from, what was rejected on the way, and which failure it targets. That record is what lets us maintain an environment instead of shipping it once, and each model we evaluate sharpens the next search. A stronger successor model then proposes harder tasks for the next round.</p>
+        </div>
+        <dl class="features">
+          <div><dt>Successor tasks</dt><dd>When pass rates near saturation, a task is replaced by a harder successor discovered against your current model, instead of being retired.</dd></div>
+          <div><dt>Hidden splits</dt><dd>Held-out data rotates on a schedule, and we monitor for contamination.</dd></div>
+          <div><dt>Exploit patches</dt><dd>When a reward hack is found, the verifier is fixed and redeployed across every affected task.</dd></div>
+          <div><dt>Current stacks</dt><dd>Dependencies track the frameworks you actually train with, and every run stays reproducible.</dd></div>
+          <div><dt>Exclusive variants</dt><dd>Your lab can hold variants no one else trains on.</dd></div>
+          <div><dt>Stateful variants</dt><dd>For continual-learning research: long-horizon variants where each stage starts from the model&#8217;s own earlier work.</dd></div>
+        </dl>
+        <figure class="chart" aria-labelledby="saw-cap">
+          <svg viewBox="0 0 640 250" role="img" aria-label="Schematic chart of pass rate over time. A one-off task climbs to about 70 percent and is retired. A Successor task is replaced by a harder successor each time it nears 70 percent, so it stays inside the learnable band.">
+            <rect x="60" y="62" width="560" height="140" fill="#F6F6F5"/>
+            <line x1="60" y1="62" x2="620" y2="62" stroke="#E0301E" stroke-width="1" stroke-dasharray="3 4"/>
+            <line x1="60" y1="20" x2="60" y2="210" stroke="#5E5E5E" stroke-width="1"/>
+            <line x1="60" y1="210" x2="620" y2="210" stroke="#5E5E5E" stroke-width="1"/>
+            <text x="50" y="66" text-anchor="end" font-size="14" fill="#5E5E5E" font-family="Geist, sans-serif">70%</text>
+            <text x="50" y="206" text-anchor="end" font-size="14" fill="#5E5E5E" font-family="Geist, sans-serif">0%</text>
+            <text x="340" y="238" text-anchor="middle" font-size="14" fill="#5E5E5E" font-family="Geist, sans-serif">Time</text>
+            <text x="614" y="52" text-anchor="end" font-size="14" fill="#E0301E" font-family="Geist, sans-serif">Typical retirement point</text>
+            <path d="M60 190 C 120 170, 170 100, 230 62" fill="none" stroke="#9A9A9A" stroke-width="2" stroke-dasharray="6 5"/>
+            <circle cx="230" cy="62" r="4.5" fill="#9A9A9A"/>
+            <text x="230" y="44" text-anchor="middle" font-size="14" fill="#5E5E5E" font-family="Geist, sans-serif">One-off task retired</text>
+            <path d="M60 196 C 100 180, 130 120, 170 76 L 170 160 C 210 140, 240 110, 290 76 L 290 160 C 330 140, 360 110, 410 76 L 410 160 C 450 140, 480 110, 530 76 L 530 160 C 560 145, 590 125, 615 105" fill="none" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
+            <text x="300" y="190" font-size="14" fill="#000" font-family="Geist, sans-serif">Successor task, replaced near saturation</text>
+          </svg>
+          <figcaption id="saw-cap">Schematic, not measured data.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="team" aria-labelledby="team-h">
+    <div class="wrap grid">
+      <h2 id="team-h">Team<small>We&#8217;ve been the customer.</small></h2>
+      <div>
+        <p class="big">Successor is founded by researchers who train and evaluate frontier models for a living.</p>
+        <ul class="edge">
+          <li>We&#8217;ve trained the research-engineering capabilities these tasks target directly into frontier models: ML engineering, post-training and kernels.</li>
+          <li>We&#8217;ve built frontier evaluations and led adversarial testing of frontier models, the two skills that finding real frontier tasks depends on.</li>
+          <li>We&#8217;ve sourced data and environments from more than 15 vendors, and we know where they break.</li>
+        </ul>
+        <p class="note team-note">We&#8217;re setting up independent task audits with university research groups, and will name them once they&#8217;ve signed off. Introductions to the team on request.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; 2026 Successor</span>
+    <span>Environments and evals for self-improving AI</span>
+  </div>
+</footer>
+
+<script>
+  // Set this once the domain's inbox exists, e.g. "founders@your-domain". While it is empty,
+  // the form explains how to reach us instead of opening a mail client.
+  const CONTACT_EMAIL = "";
+  // Optional: a form backend (e.g. a Formspree endpoint). When set, requests are posted there.
+  const FORM_ENDPOINT = "";
+
+  // Spectrum glyphs: stage k is drawn as k nested squares, each generation containing the last.
+  (function drawSpectrum() {
+    const sizes = [9, 16, 23, 30, 37, 43];
+    document.querySelectorAll("ol.spectrum li.stop").forEach(li => {
+      const k = Number(li.dataset.k);
+      const ahead = li.classList.contains("ahead");
+      const stroke = ahead ? "#9A9A9A" : "#000";
+      const ns = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(ns, "svg");
+      svg.setAttribute("viewBox", "0 0 44 44");
+      svg.setAttribute("aria-hidden", "true");
+      for (let i = k - 1; i >= 0; i--) {
+        const s = sizes[i];
+        const r = document.createElementNS(ns, "rect");
+        r.setAttribute("x", "0.75");
+        r.setAttribute("y", String(43.25 - s));
+        r.setAttribute("width", String(s - 0.5));
+        r.setAttribute("height", String(s - 0.5));
+        if (i === 0) { r.setAttribute("fill", stroke); }
+        else { r.setAttribute("fill", "none"); r.setAttribute("stroke", stroke); r.setAttribute("stroke-width", "1.5"); }
+        svg.appendChild(r);
+      }
+      li.insertBefore(svg, li.firstChild);
+    });
+  })();
+
+  const families = ["Pretraining", "Mid-training", "Post-training", "Kernels", "Harness", "Constraint optimization", "Frontier"];
+
+  // Placeholder catalog: names, sample tasks and verifiers are illustrative until the first collections ship.
+  const collections = [
+    {
+      name: "Pretraining decisions", family: "Pretraining", status: "In design", refresh: "Continuous",
+      blurb: "The choices that set what the next model can learn: data mixtures, tokenizers, schedules and scaling extrapolation. Run at proxy scale and scored by retraining on hidden seeds.",
+      tasks: [
+        ["PRE-014", "Find a data mixture that beats the baseline recipe on held-out loss at equal tokens", "hidden-seed retrain, proxy scale"],
+        ["PRE-027", "Predict loss at 10x compute from a sweep of small runs", "held-out large run"],
+        ["PRE-031", "Change the tokenizer for code without regressing multilingual loss", "held-out loss, 6 domains"]
+      ]
+    },
+    {
+      name: "Capability extension", family: "Mid-training", status: "In design", refresh: "Monthly",
+      blurb: "Extending a base model before post-training: long context, annealing data and domain upsampling. Scored on the target capability and on everything it must not break.",
+      tasks: [
+        ["MID-003", "Extend context from 32k to 256k with no short-context regression", "long-context suite + regression guard"],
+        ["MID-008", "Design an annealing mix that lifts reasoning after a fixed post-training recipe", "downstream post-training probe"],
+        ["MID-012", "Upsample a domain without overfitting to its public benchmark", "held-out domain set + contamination audit"]
+      ]
+    },
+    {
+      name: "Post-training recipes", family: "Post-training", status: "Prototype", refresh: "Continuous",
+      blurb: "The model improves its own training signal: rewards, RL recipes and data selection. Scored on held-out sets across domains, so a gain in one can't hide a regression in another.",
+      tasks: [
+        ["PST-001", "Raise held-out math without regressing code or medicine", "held-out evals, 5 domains"],
+        ["PST-002", "Design a tool-use reward that resists format hacks", "red-team exploit set"],
+        ["PST-009", "Find the reward hack in a finished RL run and patch the verifier", "planted-exploit recall"]
+      ]
+    },
+    {
+      name: "Kernels and numerics", family: "Kernels", status: "Prototype", refresh: "Continuous",
+      blurb: "Making the next training run cheaper. Scored on measured hardware time with exact numerical checks, so speed can't come from quietly changing the math.",
+      tasks: [
+        ["KER-004", "Fuse an attention variant with no change in outputs", "hardware timer + numerical equivalence"],
+        ["KER-011", "Speed up mixture-of-experts token dispatch at fixed capacity", "step time on target topology"],
+        ["KER-017", "Move a matmul to lower precision with bounded training-loss drift", "short-run loss parity"]
+      ]
+    },
+    {
+      name: "Harness engineering", family: "Harness", status: "In design", refresh: "Continuous",
+      blurb: "Improving the scaffold a frozen model works in: tools, context and search. The model gets better at running itself, scored on hidden task splits.",
+      tasks: [
+        ["HAR-001", "Improve a coding-agent harness on a hidden task split", "hidden split, frozen model"],
+        ["HAR-006", "Cut context-management failures on eight-hour research runs", "long-horizon task set"],
+        ["HAR-010", "Make a research agent spend its compute budget productively", "budget-normalized score"]
+      ]
+    },
+    {
+      name: "Research under a budget", family: "Constraint optimization", status: "In design", refresh: "Monthly",
+      blurb: "The best model under a hard limit on GPU-hours, memory or latency. This is where research taste shows, because the model has to choose what not to try.",
+      tasks: [
+        ["CON-002", "Post-train the strongest model you can in 10 GPU-hours", "held-out evals, enforced budget"],
+        ["CON-005", "Distill to a latency target with minimal quality loss", "latency + held-out quality"],
+        ["CON-009", "Train under a fixed memory ceiling on a single accelerator", "enforced memory cap + held-out loss"]
+      ]
+    },
+    {
+      name: "Weight-space programming", family: "Frontier", status: "Research", refresh: "Continuous",
+      blurb: "The model reads and writes network weights directly, with no gradient descent: working out what a network does from its weights, repairing a failure in place, or writing a small network from scratch. Scored by running the resulting network on held-out behavior.",
+      tasks: [
+        ["WSP-002", "Tell which of two small language models was tuned to be sycophantic, from the weights alone", "hidden labels, no forward passes"],
+        ["WSP-005", "Repair a failing control policy by editing a few percent of its weights, without a training loop", "held-out rollouts + weight-edit budget"],
+        ["WSP-011", "Write a small game-playing network from scratch that beats a reinforcement-learning baseline", "held-out seeds vs. trained baseline"]
+      ]
+    },
+    {
+      name: "Model merging and souping", family: "Frontier", status: "In design", refresh: "Continuous",
+      blurb: "Combining checkpoints that separate efforts fine-tuned from the same base into one model: what to merge, how, and with which weights. Scored on every source model's held-out evals, so a merge can't win one domain by losing another.",
+      tasks: [
+        ["MRG-001", "Merge five domain fine-tunes into one checkpoint that keeps each one's held-out score", "per-domain held-out evals + regression guard"],
+        ["MRG-004", "Beat uniform weight averaging on a hidden eval mix by choosing per-layer coefficients", "hidden eval mix, no extra training"],
+        ["MRG-007", "Merge an RL-tuned and an SFT-tuned checkpoint without losing the gains of either", "held-out evals of both sources"]
+      ]
+    }
+  ];
+
+  const filtersEl = document.getElementById("filters");
+  const registryEl = document.getElementById("registry");
+  let active = "All";
+
+  function el(tag, attrs = {}, text) {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "class") node.className = v; else node.setAttribute(k, v);
+    }
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function renderFilters() {
+    filtersEl.textContent = "";
+    ["All", ...families].forEach(f => {
+      const b = el("button", { type: "button", "aria-pressed": String(f === active) }, f);
+      b.addEventListener("click", () => { active = f; renderFilters(); renderRegistry(); });
+      filtersEl.appendChild(b);
+    });
+  }
+
+  function renderRegistry() {
+    registryEl.textContent = "";
+    const shown = collections.filter(c => active === "All" || c.family === active);
+    if (!shown.length) {
+      registryEl.appendChild(el("p", { class: "note" }, "No collections at this stage yet. Request one below."));
+      return;
+    }
+    shown.forEach((c, i) => {
+      const entry = el("article", { class: "entry" });
+      const head = el("div", { class: "entry-head" });
+
+      const main = el("div");
+      main.appendChild(el("h3", {}, c.name));
+      main.appendChild(el("p", { class: "fam" }, c.family));
+      main.appendChild(el("p", { class: "blurb" }, c.blurb));
+
+      const st = el("div");
+      st.appendChild(el("span", { class: "meta-label" }, "Status"));
+      st.appendChild(el("span", { class: "meta-val status" + (c.status === "Prototype" ? "" : " design") }, c.status));
+
+      const rf = el("div");
+      rf.appendChild(el("span", { class: "meta-label" }, "Refresh"));
+      rf.appendChild(el("span", { class: "meta-val" }, c.refresh));
+
+      const id = "tasks-" + c.family.toLowerCase().replace(/[^a-z]/g, "") + "-" + i;
+      const tg = el("button", { class: "toggle", type: "button", "aria-expanded": "false", "aria-controls": id }, "Show sample tasks");
+      const ask = el("button", { class: "toggle ask", type: "button" }, "Request a sample");
+      ask.addEventListener("click", () => requestSample(c.name));
+      const actions = el("div", { class: "entry-actions" });
+      actions.append(tg, ask);
+
+      head.append(main, st, rf, actions);
+
+      const tasks = el("div", { class: "tasks", id });
+      const table = el("table", { class: "task-table" });
+      const thead = el("tr");
+      ["ID", "Task", "Verifier", "Status"].forEach(h => thead.appendChild(el("th", { scope: "col" }, h)));
+      table.appendChild(thead);
+      c.tasks.forEach(([tid, title, verifier]) => {
+        const tr = el("tr");
+        tr.appendChild(el("td", { class: "id" }, tid));
+        tr.appendChild(el("td", {}, title));
+        tr.appendChild(el("td", { class: "ver" }, verifier));
+        const s = el("td"); s.appendChild(el("span", { class: "ph" }, "Illustrative")); tr.appendChild(s);
+        table.appendChild(tr);
+      });
+      tasks.appendChild(table);
+
+      tg.addEventListener("click", () => {
+        const open = entry.classList.toggle("open");
+        tg.setAttribute("aria-expanded", String(open));
+        tg.textContent = open ? "Hide sample tasks" : "Show sample tasks";
+      });
+
+      entry.append(head, tasks);
+      registryEl.appendChild(entry);
+    });
+  }
+
+  // Request form: one checkbox per collection, plus "something else".
+  const pickEl = document.getElementById("pick");
+  [...collections.map(c => c.name), "Something else (describe below)"].forEach(n => {
+    const lab = el("label");
+    const cb = el("input", { type: "checkbox", name: "collections", value: n });
+    lab.append(cb, document.createTextNode(n));
+    pickEl.appendChild(lab);
+  });
+  function requestSample(name) {
+    pickEl.querySelectorAll("input").forEach(cb => { if (cb.value === name) cb.checked = true; });
+    document.getElementById("request").scrollIntoView({ behavior: "smooth", block: "start" });
+    setTimeout(() => document.getElementById("f-name").focus({ preventScroll: true }), 450);
+  }
+
+  renderFilters();
+  renderRegistry();
+
+  // Submit: post to FORM_ENDPOINT if set, else compose an email, else explain.
+  const contactEl = document.getElementById("contact-text");
+  if (CONTACT_EMAIL) {
+    contactEl.textContent = CONTACT_EMAIL;
+  } else {
+    contactEl.parentElement.hidden = true;
+  }
+  const form = document.getElementById("access-form");
+  const msg = document.getElementById("form-msg");
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const nameEl = document.getElementById("f-name");
+    const emailEl = document.getElementById("f-email");
+    const name = nameEl.value.trim();
+    const email = emailEl.value.trim();
+    if (!name || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      msg.className = "form-msg err";
+      msg.textContent = "Add your name and a valid work email to send the request.";
+      (!name ? nameEl : emailEl).focus();
+      return;
+    }
+    const interest = form.querySelector("input[name=interest]:checked").value;
+    const picked = [...pickEl.querySelectorAll("input:checked")].map(cb => cb.value);
+    const fields = {
+      name, email,
+      organization: document.getElementById("f-org").value.trim(),
+      collections: picked.join("; ") || "Not specified",
+      for: interest,
+      note: document.getElementById("f-note").value.trim()
+    };
+    const body = [
+      "Name: " + fields.name,
+      "Email: " + fields.email,
+      "Organization: " + fields.organization,
+      "Collections: " + fields.collections,
+      "For: " + fields.for,
+      "",
+      fields.note
+    ].join("\n");
+    if (FORM_ENDPOINT) {
+      msg.className = "form-msg ok";
+      msg.textContent = "Sending...";
+      fetch(FORM_ENDPOINT, { method: "POST", headers: { "Accept": "application/json", "Content-Type": "application/json" }, body: JSON.stringify(fields) })
+        .then(r => {
+          if (!r.ok) throw new Error(String(r.status));
+          form.reset();
+          pickEl.querySelectorAll("input").forEach(cb => { cb.checked = false; });
+          msg.textContent = "Thanks. We'll reply within two working days.";
+        })
+        .catch(() => {
+          msg.className = "form-msg err";
+          msg.textContent = CONTACT_EMAIL ? "That didn't go through. Please email " + CONTACT_EMAIL + "." : "That didn't go through. Please try again later.";
+        });
+      return;
+    }
+    if (!CONTACT_EMAIL) {
+      msg.className = "form-msg ok";
+      msg.textContent = "Our inbox isn't live yet. Please reach us through the person who shared this page.";
+      return;
+    }
+    const href = "mailto:" + CONTACT_EMAIL + "?subject=" + encodeURIComponent("Successor sample request: " + fields.collections) + "&body=" + encodeURIComponent(body);
+    try { window.location.href = href; } catch (err) {}
+    msg.className = "form-msg ok";
+    msg.textContent = "Your email app should open with the request filled in. If it doesn't, send it to " + CONTACT_EMAIL + ".";
+  });
+</script>
+</body>
+</html>
