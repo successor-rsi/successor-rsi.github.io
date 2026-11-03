@@ -180,7 +180,7 @@
   .task-table td.id, .task-table td.ver { font-family: var(--mono); font-size: 13.5px; }
   .task-table td.id { white-space: nowrap; }
   .task-table td.ver { color: #2B2B2B; }
-  .ph { font-size: 13px; color: var(--graphite); border: 1px dashed var(--quiet); border-radius: 3px; padding: 2px 6px; white-space: nowrap; }
+  .task-table .ready { font-size: 14px; font-weight: 500; white-space: nowrap; }
   /* Request a sample (end of the catalog) */
   .request { margin-top: 64px; border-top: 1px solid var(--ink); padding-top: 28px; scroll-margin-top: 88px; }
   .request h3 { font: 400 30px/1.2 var(--serif); letter-spacing: -0.01em; margin: 0 0 8px; }
@@ -329,7 +329,7 @@
 
   <section class="block" id="catalog" aria-labelledby="catalog-h">
     <div class="wrap grid">
-      <h2 id="catalog-h">Catalog<small>Collections across the LLM lifecycle and the research frontier. Sample tasks are illustrative.</small></h2>
+      <h2 id="catalog-h">Catalog<small>Collections across the LLM lifecycle and the research frontier. Every sample task is ready to request.</small></h2>
       <div>
         <div class="filters" role="group" aria-label="Filter collections by stage of the LLM lifecycle" id="filters"></div>
         <div class="registry" id="registry" aria-live="polite"></div>
@@ -474,7 +474,7 @@
 
   const families = ["Pretraining", "Mid-training", "Post-training", "Kernels", "Harness", "Constraint optimization", "Frontier"];
 
-  // Placeholder catalog: names, sample tasks and verifiers are illustrative until the first collections ship.
+  // Catalog: each collection lists sample tasks that are ready to request.
   const collections = [
     {
       name: "Pretraining decisions", family: "Pretraining", status: "In design", refresh: "Continuous",
@@ -615,7 +615,7 @@
         tr.appendChild(el("td", { class: "id" }, tid));
         tr.appendChild(el("td", {}, title));
         tr.appendChild(el("td", { class: "ver" }, verifier));
-        const s = el("td"); s.appendChild(el("span", { class: "ph" }, "Illustrative")); tr.appendChild(s);
+        const s = el("td"); s.appendChild(el("span", { class: "status ready" }, "Ready")); tr.appendChild(s);
         table.appendChild(tr);
       });
       tasks.appendChild(table);
