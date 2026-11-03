@@ -334,8 +334,8 @@
         <div class="filters" role="group" aria-label="Filter collections by stage of the LLM lifecycle" id="filters"></div>
         <div class="registry" id="registry" aria-live="polite"></div>
         <div class="request" id="request">
-          <h3>Request a free sample</h3>
-          <p>Samples are free. Pick the collections you want to try, and we&#8217;ll send a sample task with its verifier and a baseline run. We&#8217;re open to any kind of collaboration: design partnerships, custom collections, evaluating your models, joint research, or something we haven&#8217;t thought of yet. Questions are welcome too. We reply within two working days.</p>
+          <h3>Request a sample</h3>
+          <p>Samples are provided at no cost. Select the collections you would like to evaluate, and we will send a sample task with its verifier and a baseline run. We also work with teams on custom collections, model evaluations and joint research, and welcome general inquiries. We respond within two business days.</p>
           <form class="access" id="access-form" novalidate>
             <fieldset class="field full">
               <legend>Collections</legend>
@@ -354,16 +354,16 @@
               <input id="f-org" name="org" type="text" autocomplete="organization">
             </div>
             <fieldset class="field full">
-              <legend>What it&#8217;s for <span class="opt">(pick any)</span></legend>
+              <legend>Intended use <span class="opt">(select all that apply)</span></legend>
               <div class="pick" id="uses"></div>
             </fieldset>
             <div class="field full">
-              <label for="f-note">Tell us about your work, or ask us anything</label>
+              <label for="f-note">Project details or questions <span class="opt">(optional)</span></label>
               <textarea id="f-note" name="note"></textarea>
             </div>
             <div class="hp" aria-hidden="true"><label for="f-hp">Leave this empty</label><input id="f-hp" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
             <div class="field full" style="flex-direction:row;align-items:center;gap:16px;flex-wrap:wrap">
-              <button class="btn" type="submit" id="f-submit">Send request</button>
+              <button class="btn" type="submit" id="f-submit">Submit request</button>
               <span class="note">Or email <span id="contact-text"></span></span>
             </div>
             <p class="form-msg" id="form-msg" role="status"></p>
@@ -631,16 +631,16 @@
     });
   }
 
-  // Request form: one checkbox per collection, plus "something else".
+  // Request form: one checkbox per collection, plus a custom-collection option.
   const pickEl = document.getElementById("pick");
-  [...collections.map(c => c.name), "Something else (describe below)"].forEach(n => {
+  [...collections.map(c => c.name), "Custom collection"].forEach(n => {
     const lab = el("label");
     const cb = el("input", { type: "checkbox", name: "collections", value: n });
     lab.append(cb, document.createTextNode(n));
     pickEl.appendChild(lab);
   });
   const usesEl = document.getElementById("uses");
-  ["Training", "Evaluation", "Research", "A collaboration", "Just a question", "Something else"].forEach(n => {
+  ["Model training", "Model evaluation", "Research", "Partnership", "General inquiry", "Other"].forEach(n => {
     const lab = el("label");
     const cb = el("input", { type: "checkbox", name: "uses", value: n });
     lab.append(cb, document.createTextNode(n));
@@ -672,7 +672,7 @@
     const email = emailEl.value.trim();
     if (!name || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       msg.className = "form-msg err";
-      msg.textContent = "Add your name and a valid email to send the request.";
+      msg.textContent = "Please enter your name and a valid email address.";
       (!name ? nameEl : emailEl).focus();
       return;
     }
@@ -714,11 +714,11 @@
           pickEl.querySelectorAll("input").forEach(cb => { cb.checked = false; });
           usesEl.querySelectorAll("input").forEach(cb => { cb.checked = false; });
           msg.className = "form-msg ok";
-          msg.textContent = "Thanks, " + fields.name + ". Your request is with us, and we'll reply within two working days.";
+          msg.textContent = "Thank you, " + fields.name + ". We have received your request and will respond within two business days.";
         })
         .catch(() => {
           msg.className = "form-msg err";
-          msg.textContent = CONTACT_EMAIL ? "That didn't go through. Please email " + CONTACT_EMAIL + "." : "That didn't go through. Please try again in a minute.";
+          msg.textContent = CONTACT_EMAIL ? "Your request could not be sent. Please email " + CONTACT_EMAIL + "." : "Your request could not be sent. Please try again shortly.";
         })
         .finally(() => { btn.disabled = false; });
       return;
